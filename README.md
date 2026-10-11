@@ -7,6 +7,8 @@
 
 This browser extension adds a **Picture-in-Picture (PiP)** button directly to the Crunchyroll player controls.
 
+**Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/crunchyroll-pip-helper/efbolanjjjjhlfjghaicbfgbomjilhbo).**
+
 ![Crunchyroll PiP preview](assets/preview.png)
 
 The button appears only:
