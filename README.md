@@ -29,7 +29,7 @@ The extension uses Chromium extension APIs. The WebKit PiP fallback in the video
 
 ## Installation from a GitHub release
 
-1. Open the repository's [Releases](https://github.com/mlemors/crunchyroll-pip-extension/releases) page.
+1. Open the repository's [Releases](https://github.com/ari92p/crunchyroll-pip-extension/releases) page.
 2. Download the ZIP from the latest release.
 3. Extract the ZIP to a permanent folder.
 4. Open `chrome://extensions`.
