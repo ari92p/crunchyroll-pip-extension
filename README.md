@@ -85,6 +85,15 @@ Chrome Web Store screenshots and promotional images live in `assets/store/`; the
 The regression suite uses simulated browser APIs and DOM fixtures. Playback on the live
 Crunchyroll site, DRM behavior, and browser shortcut dispatch require a separate browser check.
 
+## Support
+
+If this extension is useful to you, you can buy me a coffee:
+
+<p>
+  <a href="https://ko-fi.com/ari92p"><img alt="Support me on Ko-fi" src="https://ko-fi.com/img/githubbutton_sm.svg" height="36"></a>
+  <a href="https://buymeacoffee.com/ari92p"><img alt="Buy Me a Coffee" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="36"></a>
+</p>
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
