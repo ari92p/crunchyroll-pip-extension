@@ -4,7 +4,6 @@
   "description": "Adds a Picture-in-Picture button with Option+P on macOS and Alt+P on Windows/Linux.",
   "version": "1.0.6",
   "homepage_url": "https://github.com/ari92p/crunchyroll-pip-extension",
-  "permissions": ["scripting"],
   "host_permissions": [
     "https://www.crunchyroll.com/*",
     "https://crunchyroll.com/*"

@@ -12,7 +12,7 @@ The extension does not store this information, build a browsing history, or send
 
 ## Permissions
 
-The `scripting` permission is used when you click the extension's toolbar button to invoke Picture-in-Picture for the active Crunchyroll video. Access is restricted to Crunchyroll pages by the extension's host permissions. The extension does not execute remotely hosted code.
+The extension requests no API permissions. Its host permissions limit it to Crunchyroll pages, where it adds the Picture-in-Picture button and handles the toolbar click and keyboard shortcut. The extension does not execute remotely hosted code.
 
 ## Changes and contact
 

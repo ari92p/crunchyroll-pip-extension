@@ -8,8 +8,8 @@ function load(file, document = {}) {
   const context = vm.createContext({
     URL, console, document: { readyState: 'loading', addEventListener() {}, ...document },
     chrome: {
-      scripting: { executeScript: async ({ func }) => func() },
-      tabs: { query: async () => [] },
+      runtime: { onMessage: { addListener(fn) { handlers.message = fn; } } },
+      tabs: { query: async () => [], sendMessage: async (...args) => { handlers.sent = args; } },
       commands: { onCommand: { addListener(fn) { handlers.command = fn; } } },
       action: { onClicked: { addListener(fn) { handlers.click = fn; } } }
     }
@@ -22,8 +22,8 @@ function video(options = {}) {
     removeAttribute() { this.removed = true; }, ...options };
 }
 
-for (const file of ['content.js', 'background.js']) {
-  const toggle = file === 'content.js' ? 'togglePiP()' : 'runTogglePip(1)';
+for (const file of ['content.js']) {
+  const toggle = 'togglePiP()';
   test(`${file}: exits existing PiP even when no current video is found`, async () => {
     let exited = 0;
     const { context } = load(file, { pictureInPictureElement: {},
@@ -96,4 +96,35 @@ test('content: player controls accept nested wrappers without CSS class dependen
   };
   context.mountPipButtonInControls();
   assert.equal(inserted, true);
+});
+test('background: toolbar click messages the content script on Crunchyroll tabs only', async () => {
+  const { handlers } = load('background.js');
+  await handlers.click({ id: 1, url: 'https://www.crunchyroll.com/watch/x' });
+  assert.equal(JSON.stringify(handlers.sent), JSON.stringify([1, { type: 'cr-pip-toggle' }]));
+  handlers.sent = undefined;
+  await handlers.click({ id: 2, url: 'https://example.com/' });
+  assert.equal(handlers.sent, undefined);
+});
+test('content: toggle message triggers PiP, other messages are ignored', async () => {
+  let entered = 0;
+  const { context, handlers } = load('content.js', { pictureInPictureEnabled: true,
+    querySelectorAll: () => [video({ requestPictureInPicture: async () => entered++ })] });
+  handlers.message({ type: 'other' });
+  await new Promise((r) => setImmediate(r));
+  assert.equal(entered, 0);
+  handlers.message({ type: 'cr-pip-toggle' });
+  await new Promise((r) => setImmediate(r));
+  assert.equal(entered, 1);
+});
+test('content: subtitle button is found in all Crunchyroll UI languages', () => {
+  const { context } = load('content.js');
+  const controls = (label) => ({ querySelectorAll: () => [
+    { getAttribute: (n) => n === 'aria-label' ? 'Volume' : null, textContent: '' },
+    { getAttribute: (n) => n === 'aria-label' ? label : null, textContent: '' }
+  ] });
+  for (const label of ['Subtitles', 'Untertitel', 'Subtítulos', 'Legendas', 'Sous-titres', 'Sottotitoli', 'Субтитры', 'الترجمة']) {
+    assert.ok(context.findSubtitleButton(controls(label)), label);
+  }
+  assert.equal(context.findSubtitleButton({ querySelectorAll: () => [
+    { getAttribute: () => 'Volume', textContent: '' }] }), null);
 });

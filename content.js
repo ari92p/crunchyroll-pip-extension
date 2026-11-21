@@ -11,7 +11,8 @@ const PIP_ICON_SVG = `
 `;
 
 function getShortcutLabel() {
-  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  const platform = navigator.userAgentData?.platform || navigator.platform || '';
+  const isMac = /Mac|iPhone|iPad|iPod/.test(platform);
   return isMac ? 'Option+P' : 'Alt+P';
 }
 
@@ -131,17 +132,36 @@ async function togglePiP() {
   }
 }
 
-function buttonText(btn) {
-  return [btn.getAttribute('aria-label'), btn.getAttribute('title'), btn.textContent]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
+function normalizeText(value) {
+  return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+
+function buttonText(btn) {
+  return normalizeText(
+    [btn.getAttribute('aria-label'), btn.getAttribute('title'), btn.getAttribute('data-testid'), btn.textContent]
+      .filter(Boolean)
+      .join(' ')
+  );
+}
+
+// Labels for the Crunchyroll UI languages (matched without diacritics, case-insensitive).
+const SUBTITLE_LABELS = [
+  'subtitle', 'caption', // en
+  'untertitel', // de
+  'subtitulo', // es-419, es-ES
+  'legenda', // pt-BR, pt-PT
+  'sous-titre', 'sous titre', // fr
+  'sottotitol', // it
+  'субтитр', // ru
+  'ترجمة', 'الترجمات' // ar
+].map(normalizeText);
 
 function findSubtitleButton(controls) {
   const buttons = Array.from(controls.querySelectorAll('button'));
-  const labels = ['untertitel', 'subtitle', 'subtitles', 'caption', 'captions'];
-  return buttons.find((btn) => labels.some((label) => buttonText(btn).includes(label))) || null;
+  return buttons.find((btn) => {
+    const text = buttonText(btn);
+    return SUBTITLE_LABELS.some((label) => text.includes(label));
+  }) || null;
 }
 
 function removePipButton() {
@@ -281,7 +301,7 @@ function bindVideoListeners(video) {
   }
   video.dataset.crPipHelperBound = '1';
 
-  ['play', 'playing', 'pause', 'timeupdate', 'loadedmetadata', 'seeking', 'ended'].forEach((name) => {
+  ['play', 'playing', 'pause', 'loadedmetadata', 'ended'].forEach((name) => {
     video.addEventListener(name, scheduleMount, { passive: true });
   });
 }
@@ -294,6 +314,15 @@ function scheduleMount() {
     mountScheduled = false;
     getVideos().forEach(bindVideoListeners);
     mountPipButtonInControls();
+  });
+}
+
+// The toolbar button in background.js asks this script to toggle PiP.
+if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type === 'cr-pip-toggle') {
+      togglePiP();
+    }
   });
 }
 
